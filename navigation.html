@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Console</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #00ff41;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .navigation-console {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border: 3px solid #e74c3c;
+            border-radius: 20px;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        
+        .nav-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .nav-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #ecf0f1;
+            letter-spacing: 3px;
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .status-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #27ae60;
+            box-shadow: 0 0 10px #27ae60;
+        }
+        
+        .status-light.warning {
+            background: #f39c12;
+            box-shadow: 0 0 10px #f39c12;
+        }
+        
+        .status-light.tracking {
+            background: #e74c3c;
+            box-shadow: 0 0 10px #e74c3c;
+            animation: trackingPulse 1s infinite;
+        }
+        
+        .status-light.shared {
+            background: #3498db;
+            box-shadow: 0 0 10px #3498db;
+            animation: sharedPulse 2s infinite;
+        }
+        
+        @keyframes trackingPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        @keyframes sharedPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .tracking-status {
+            font-size: 10px;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .shared-status {
+            font-size: 10px;
+            color: #3498db;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .coordinates {
+            font-size: 24px;
+            color: #27ae60;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        .map-container {
+            width: 100%;
+            height: 350px;
+            background: #1a252f;
+            border: 2px solid #34495e;
+            border-radius: 10px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+        
+        .location-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .location-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            pointer-events: all;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .location-dot:hover {
+            transform: scale(1.5);
+            box-shadow: 0 0 15px rgba(255,255,255,0.8);
+        }
+        
+        .location-dot.best-buy { background: #27ae60; }
+        .location-dot.target { background: #e74c3c; }
+        .location-dot.walmart { background: #f39c12; }
+        .location-dot.home { background: #3498db; }
+        .location-dot.current { 
+            background: #fff;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px #fff; }
+            50% { box-shadow: 0 0 20px #fff, 0 0 30px #fff; }
+            100% { box-shadow: 0 0 10px #fff; }
+        }
+        
+        .mission-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        
+        .info-panel {
+            background: rgba(52, 73, 94, 0.3);
+            border: 1px solid #34495e;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: #bdc3c7;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .control-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .nav-button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+        
+        .nav-button:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .nav-button:active {
+            transform: translateY(0);
+        }
+        
+        .nav-button.legend {
+            background: #f39c12;
+        }
+        
+        .nav-button.legend:hover {
+            background: #e67e22;
+        }
+        
+        .nav-button.track {
+            background: #9b59b6;
+        }
+        
+        .nav-button.track:hover {
+            background: #8e44ad;
+        }
+        
+        .nav-button.center {
+            background: #27ae60;
+        }
+        
+        .nav-button.center:hover {
+            background: #229954;
+        }
+        
+        .nav-button.traffic {
+            background: #16a085;
+        }
+        
+        .nav-button.traffic:hover {
+            background: #138d75;
+        }
+        
+        .nav-button.traffic.active {
+            background: #e67e22;
+            box-shadow: 0 0 10px #e67e22;
+        }
+        
+        .nav-button.track.active {
+            background: #e74c3c;
+            animation: trackingButton 2s infinite;
+        }
+            background: #7f8c8d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .nav-button.disabled:hover {
+            background: #7f8c8d;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        @keyframes trackingButton {
+            0%, 100% { box-shadow: 0 0 10px #e74c3c; }
+            50% { box-shadow: 0 0 20px #e74c3c, 0 0 30px #e74c3c; }
+        }
+        
+        /* Add loading state for map */
+        .map-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        /* Mode indicator */
+        .mode-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #3498db;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+        }
+        
+        .mode-indicator.tracking {
+            color: #e74c3c;
+        }
+        
+        /* Legend Popup Styles */
+        .legend-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .legend-panel {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border: 3px solid #e74c3c;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            animation: legendSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes legendSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .legend-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #34495e;
+        }
+        
+        .legend-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ecf0f1;
+            letter-spacing: 2px;
+        }
+        
+        .legend-close {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .legend-close:hover {
+            background: #c0392b;
+            transform: rotate(90deg);
+        }
+        
+        .legend-content {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: rgba(52, 73, 94, 0.3);
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .legend-item:hover {
+            background: rgba(52, 73, 94, 0.5);
+            transform: translateX(5px);
+        }
+        
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            margin-right: 15px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+        
+        .legend-dot.best-buy { 
+            background: #27ae60; 
+            border-left-color: #27ae60;
+        }
+        .legend-dot.target { 
+            background: #e74c3c; 
+            border-left-color: #e74c3c;
+        }
+        .legend-dot.walmart { 
+            background: #f39c12; 
+            border-left-color: #f39c12;
+        }
+        .legend-dot.home { 
+            background: #3498db; 
+            border-left-color: #3498db;
+        }
+        .legend-dot.current { 
+            background: #fff; 
+            border-left-color: #fff;
+            animation: pulse 2s infinite;
+        }
+        .legend-dot.trail {
+            background: #9b59b6;
+            border-left-color: #9b59b6;
+        }
+        
+        .legend-info {
+            flex: 1;
+        }
+        
+        .legend-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ecf0f1;
+            margin-bottom: 4px;
+        }
+        
+        .legend-description {
+            font-size: 12px;
+            color: #bdc3c7;
+            line-height: 1.4;
+        }
+        
+        .legend-item.best-buy { border-left-color: #27ae60; }
+        .legend-item.target { border-left-color: #e74c3c; }
+        .legend-item.walmart { border-left-color: #f39c12; }
+        .legend-item.home { border-left-color: #3498db; }
+        .legend-item.current { border-left-color: #fff; }
+        .legend-item.trail { border-left-color: #9b59b6; }
+        
+        /* Location Detail Popup */
+        .location-detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1100;
+            backdrop-filter: blur(5px);
+        }
+        
+        .location-detail-panel {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border: 3px solid #e74c3c;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            animation: detailSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes detailSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #34495e;
+        }
+        
+        .detail-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ecf0f1;
+            letter-spacing: 2px;
+        }
+        
+        .detail-close {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .detail-close:hover {
+            background: #c0392b;
+            transform: rotate(90deg);
+        }
+        
+        .detail-content {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .detail-section {
+            background: rgba(52, 73, 94, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .detail-section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #f39c12;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #bdc3c7;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .detail-value {
+            font-size: 14px;
+            color: #ecf0f1;
+            font-weight: bold;
+        }
+        
+        .detail-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .detail-button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        .detail-button:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+        
+        .detail-button.navigate {
+            background: #e74c3c;
+        }
+        
+        .detail-button.navigate:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="navigation-console">
+        <div class="nav-header">
+            <div class="nav-badge">NAV</div>
+            <div class="nav-title">NAVIGATION</div>
+            <div class="status-indicators">
+                <div class="status-light warning"></div>
+                <div class="status-light"></div>
+                <div class="status-light tracking" id="trackingLight" style="display: none;"></div>
+                <div class="tracking-status" id="trackingStatus" style="display: none;">TRACKING</div>
+                <div class="status-light shared" id="sharedLight" style="display: none;"></div>
+                <div class="shared-status" id="sharedStatus" style="display: none;">SHARED</div>
+            </div>
+        </div>
+        
+        <div class="coordinates">
+            38.9784° N, 76.4951° W
+        </div>
+        
+        <div class="map-container">
+            <div class="mode-indicator" id="modeIndicator">VIEWER MODE</div>
+            <div id="map">
+                <div class="map-loading">
+                    INITIALIZING TACTICAL DISPLAY...
+                </div>
+            </div>
+            <div class="location-overlay" id="locationOverlay">
+                <!-- Location dots will be positioned here -->
+            </div>
+        </div>
+        
+        <div class="mission-info">
+            <div class="info-panel">
+                <div class="info-label">Primary Target:</div>
+                <div class="info-value">Best Buy Annapolis</div>
+            </div>
+            <div class="info-panel">
+                <div class="info-label">Launch Strategy:</div>
+                <div class="info-value">MIDNIGHT ASSAULT</div>
+            </div>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="nav-button center" onclick="centerMap()">CENTER</button>
+            <button class="nav-button" id="routeButton" onclick="plotRoute()">ROUTE</button>
+            <button class="nav-button traffic" id="trafficButton" onclick="toggleTraffic()">TRAFFIC</button>
+            <button class="nav-button track" id="trackButton" onclick="toggleTracking()">TRACK</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 10px;">
+            <button class="nav-button legend" onclick="showLegend()" title="Show tactical legend" style="width: 120px; padding: 8px; font-size: 14px;">➕ LEGEND</button>
+        </div>
+    </div>
+
+    <!-- Legend Popup -->
+    <div class="legend-overlay" id="legendOverlay" onclick="hideLegend()">
+        <div class="legend-panel" onclick="event.stopPropagation()">
+            <div class="legend-header">
+                <div class="legend-title">TACTICAL LEGEND</div>
+                <button class="legend-close" onclick="hideLegend()">×</button>
+            </div>
+            <div class="legend-content">
+                <div class="legend-item best-buy">
+                    <div class="legend-dot best-buy"></div>
+                    <div class="legend-info">
+                        <div class="legend-name">Best Buy</div>
+                        <div class="legend-description">Electronics retailer - Primary mission target</div>
+                    </div>
+                </div>
+                <div class="legend-item target">
+                    <div class="legend-dot target"></div>
+                    <div class="legend-info">
+                        <div class="legend-name">Target</div>
+                        <div class="legend-description">General retailer - Secondary objective</div>
+                    </div>
+                </div>
+                <div class="legend-item walmart">
+                    <div class="legend-dot walmart"></div>
+                    <div class="legend-info">
+                        <div class="legend-name">Walmart</div>
+                        <div class="legend-description">Supercenter - Supply resupply point</div>
+                    </div>
+                </div>
+                <div class="legend-item home">
+                    <div class="legend-dot home"></div>
+                    <div class="legend-info">
+                        <div class="legend-name">Home Base</div>
+                        <div class="legend-description">Secure location - Command center</div>
+                    </div>
+                </div>
+                <div class="legend-item current">
+                    <div class="legend-dot current"></div>
+                    <div class="legend-info">
+                        <div class="legend-name">Current Position</div>
+                        <div class="legend-description">Real-time location tracking - Live GPS</div>
+                    </div>
+                </div>
+                <div class="legend-item trail">
+                    <div class="legend-dot trail"></div>
+                    <div class="legend-info">
+                        <div class="legend-name">Movement Trail</div>
+                        <div class="legend-description">Historical path tracking - Mission breadcrumbs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Detail Popup -->
+    <div class="location-detail-overlay" id="locationDetailOverlay" onclick="hideLocationDetail()">
+        <div class="location-detail-panel" onclick="event.stopPropagation()">
+            <div class="detail-header">
+                <div class="detail-title" id="detailTitle">LOCATION INTEL</div>
+                <button class="detail-close" onclick="hideLocationDetail()">×</button>
+            </div>
+            <div class="detail-content" id="detailContent">
+                <!-- Content will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // NASA Tactical Map Style
+        const nasaTacticalStyle = [
+            {
+                "elementType": "geometry",
+                "stylers": [{"color": "#0a0a0a"}]
+            },
+            {
+                "elementType": "labels",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "administrative",
+                "elementType": "geometry",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "administrative.land_parcel",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "administrative.locality",
+                "elementType": "labels",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "administrative.neighborhood",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "landscape",
+                "elementType": "geometry",
+                "stylers": [{"color": "#1a252f"}]
+            },
+            {
+                "featureType": "landscape.man_made",
+                "elementType": "geometry",
+                "stylers": [{"color": "#2c3e50"}]
+            },
+            {
+                "featureType": "landscape.natural",
+                "elementType": "geometry",
+                "stylers": [{"color": "#1a252f"}]
+            },
+            {
+                "featureType": "poi",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "road",
+                "elementType": "geometry",
+                "stylers": [{"color": "#34495e"}, {"weight": 1}]
+            },
+            {
+                "featureType": "road",
+                "elementType": "labels",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "road.arterial",
+                "elementType": "geometry",
+                "stylers": [{"color": "#e74c3c"}, {"weight": 1}]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry",
+                "stylers": [{"color": "#f39c12"}, {"weight": 2}]
+            },
+            {
+                "featureType": "road.local",
+                "elementType": "geometry",
+                "stylers": [{"color": "#34495e"}, {"weight": 0.5}]
+            },
+            {
+                "featureType": "transit",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "water",
+                "elementType": "geometry",
+                "stylers": [{"color": "#0f3460"}]
+            },
+            {
+                "featureType": "water",
+                "elementType": "labels",
+                "stylers": [{"visibility": "off"}]
+            }
+        ];
+
+        // Store locations with enhanced details
+        const locations = {
+            bestBuy: {
+                name: 'Best Buy Annapolis',
+                coords: { lat: 38.9784, lng: -76.4951 },
+                address: '2021 Annapolis Mall, Annapolis, MD 21401',
+                type: 'best-buy',
+                status: 'Open until 10 PM',
+                phone: '(410) 266-9465',
+                hours: '10 AM - 10 PM',
+                distance: '0.8 miles',
+                eta: '3 mins',
+                category: 'Electronics',
+                services: ['Geek Squad', 'Best Buy Mobile', 'Car Installation']
+            },
+            target: {
+                name: 'Target Annapolis',
+                coords: { lat: 38.9820, lng: -76.5020 },
+                address: '1905 Towne Centre Blvd, Annapolis, MD 21401',
+                type: 'target',
+                status: 'Open until 11 PM',
+                phone: '(410) 266-5856',
+                hours: '8 AM - 11 PM',
+                distance: '1.2 miles',
+                eta: '5 mins',
+                category: 'General Retail',
+                services: ['Pharmacy', 'Grocery', 'Starbucks Cafe']
+            },
+            walmart: {
+                name: 'Walmart Supercenter',
+                coords: { lat: 38.9750, lng: -76.4800 },
+                address: '1131 Annapolis Mall Rd, Annapolis, MD 21401',
+                type: 'walmart',
+                status: 'Open 24 hours',
+                phone: '(410) 266-7722',
+                hours: '24 Hours',
+                distance: '1.5 miles',
+                eta: '6 mins',
+                category: 'Supercenter',
+                services: ['Grocery', 'Pharmacy', 'Auto Service', 'Vision Center']
+            },
+            home: {
+                name: 'Home Base',
+                coords: { lat: 38.9800, lng: -76.4900 },
+                address: 'Classified Location',
+                type: 'home',
+                status: 'Secure',
+                phone: 'N/A',
+                hours: 'Always Available',
+                distance: '0 miles',
+                eta: 'Current',
+                category: 'Command Center',
+                services: ['Safe House', 'Communications Hub', 'Supply Cache']
+            }
+        };
+
+        let map;
+        let markers = {};
+        let currentLocationMarker = null;
+        let userLocation = null;
+        let trackingActive = false;
+        let trackingWatchId = null;
+        let movementTrail = [];
+        let trailPolyline = null;
+        let lastPosition = null;
+        let targetLocation = null; // For intelligent routing
+        let trafficLayer = null;
+        let trafficEnabled = false;
+        let routeDisplayed = false;
+        let currentDirectionsRenderer = null;
+
+        let isOwner = true; // This would be determined by URL params or auth in real implementation
+        let sharedData = null;
+        const MOVEMENT_THRESHOLD = 0.0001; // ~10 meters
+
+        // Initialize Google Map with enhanced NASA/space theme
+        function initMap() {
+            const center = { lat: 38.9784, lng: -76.4951 };
+            
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 14,
+                center: center,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                styles: nasaTacticalStyle,
+                disableDefaultUI: true,
+                gestureHandling: 'greedy',
+                backgroundColor: '#0a0a0a',
+                clickableIcons: false,
+                keyboardShortcuts: false
+            });
+
+            // Initialize traffic layer
+            trafficLayer = new google.maps.TrafficLayer();
+
+            // Add location markers with enhanced styling
+            Object.keys(locations).forEach(key => {
+                const location = locations[key];
+                
+                const marker = new google.maps.Marker({
+                    position: location.coords,
+                    map: map,
+                    title: location.name,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: getLocationColor(location.type),
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 3,
+                        scale: 10
+                    },
+                    animation: google.maps.Animation.DROP
+                });
+
+                markers[key] = marker;
+
+                // Add enhanced click listener for location details
+                marker.addListener('click', () => {
+                    // Set as target for intelligent routing
+                    targetLocation = location;
+                    updateRouteButton();
+                    
+                    showLocationDetail(location);
+                    
+                    // Add tactical highlighting effect
+                    marker.setIcon({
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: getLocationColor(location.type),
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 5,
+                        scale: 15
+                    });
+                    
+                    // Reset after 2 seconds
+                    setTimeout(() => {
+                        marker.setIcon({
+                            path: google.maps.SymbolPath.CIRCLE,
+                            fillColor: getLocationColor(location.type),
+                            fillOpacity: 1,
+                            strokeColor: '#ffffff',
+                            strokeWeight: 3,
+                            scale: 10
+                        });
+                    }, 2000);
+                });
+            });
+
+            // Determine mode based on URL or user agent
+            detectViewerMode();
+
+            // Get and track current location (only if owner)
+            if (isOwner && navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    // Add current location marker
+                    currentLocationMarker = new google.maps.Marker({
+                        position: userLocation,
+                        map: map,
+                        title: 'Current Location',
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            fillColor: '#ffffff',
+                            fillOpacity: 1,
+                            strokeColor: '#e74c3c',
+                            strokeWeight: 3,
+                            scale: 8
+                        },
+                        zIndex: 1000
+                    });
+
+                    // Center map on user location
+                    map.setCenter(userLocation);
+                    lastPosition = userLocation;
+                    
+                    // Update distances for all locations
+                    updateDistancesFromCurrentLocation();
+                });
+            } else {
+                // Viewer mode - load shared data
+                loadSharedTrackingData();
+            }
+        }
+
+        function detectViewerMode() {
+            // Check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const viewMode = urlParams.get('view');
+            const userAgent = navigator.userAgent;
+            
+            // If view=shared or accessing from different device/browser
+            if (viewMode === 'shared' || isLikelyViewer()) {
+                isOwner = false;
+                setViewerMode();
+            } else {
+                setOwnerMode();
+            }
+        }
+
+        function isLikelyViewer() {
+            // Simple heuristic - in real app, this would check authentication
+            const hasLocalTracking = localStorage.getItem('navigation_owner');
+            return !hasLocalTracking;
+        }
+
+        function setOwnerMode() {
+            isOwner = true;
+            localStorage.setItem('navigation_owner', 'true');
+            document.getElementById('modeIndicator').textContent = 'OWNER MODE';
+            document.getElementById('modeIndicator').classList.add('tracking');
+        }
+
+        function setViewerMode() {
+            isOwner = false;
+            document.getElementById('modeIndicator').textContent = 'VIEWER MODE';
+            document.getElementById('trackButton').classList.add('disabled');
+            document.getElementById('trackButton').textContent = 'VIEW ONLY';
+            document.getElementById('trackButton').onclick = null;
+            
+            // Disable other owner-only buttons
+            document.getElementById('routeButton').classList.add('disabled');
+            document.getElementById('routeButton').onclick = null;
+            
+            // Show shared indicator
+            document.getElementById('sharedLight').style.display = 'block';
+            document.getElementById('sharedStatus').style.display = 'block';
+        }
+
+        function getLocationColor(type) {
+            const colors = {
+                'best-buy': '#27ae60',
+                'target': '#e74c3c',
+                'walmart': '#f39c12',
+                'home': '#3498db',
+                'current': '#ffffff'
+            };
+            return colors[type] || '#7f8c8d';
+        }
+
+        function updateDistancesFromCurrentLocation() {
+            if (!userLocation) return;
+
+            Object.keys(locations).forEach(key => {
+                const location = locations[key];
+                if (location.type !== 'current') {
+                    const distance = calculateDistance(userLocation, location.coords);
+                    const eta = calculateETA(distance);
+                    location.distance = `${distance.toFixed(1)} miles`;
+                    location.eta = eta;
+                }
+            });
+        }
+
+        function calculateDistance(pos1, pos2) {
+            const R = 3959; // Earth's radius in miles
+            const dLat = (pos2.lat - pos1.lat) * Math.PI / 180;
+            const dLon = (pos2.lng - pos1.lng) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(pos1.lat * Math.PI / 180) * Math.cos(pos2.lat * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function calculateETA(distance) {
+            // Assume average city speed of 25 mph
+            const timeHours = distance / 25;
+            const timeMinutes = Math.round(timeHours * 60);
+            return `${timeMinutes} mins`;
+        }
+
+        function toggleTracking() {
+            if (!isOwner) return;
+
+            const button = document.getElementById('trackButton');
+            const trackingLight = document.getElementById('trackingLight');
+            const trackingStatus = document.getElementById('trackingStatus');
+
+            if (!trackingActive) {
+                // Start tracking
+                startLocationTracking();
+                button.textContent = 'STOP';
+                button.classList.add('active');
+                trackingLight.style.display = 'block';
+                trackingStatus.style.display = 'block';
+                document.getElementById('modeIndicator').textContent = 'TRACKING MODE';
+                trackingActive = true;
+            } else {
+                // Stop tracking
+                stopLocationTracking();
+                button.textContent = 'TRACK';
+                button.classList.remove('active');
+                trackingLight.style.display = 'none';
+                trackingStatus.style.display = 'none';
+                document.getElementById('modeIndicator').textContent = 'OWNER MODE';
+                trackingActive = false;
+            }
+        }
+
+        function startLocationTracking() {
+            if (!isOwner || !navigator.geolocation) return;
+
+            trackingWatchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const newPosition = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    // Update current location marker
+                    if (currentLocationMarker) {
+                        currentLocationMarker.setPosition(newPosition);
+                    }
+
+                    // Update coordinates display
+                    const lat = newPosition.lat.toFixed(4);
+                    const lng = newPosition.lng.toFixed(4);
+                    document.querySelector('.coordinates').textContent = `${lat}° N, ${lng}° W`;
+
+                    // Add to trail if moved significantly
+                    if (lastPosition && hasMovedSignificantly(lastPosition, newPosition)) {
+                        movementTrail.push(newPosition);
+                        updateTrailDisplay();
+                        lastPosition = newPosition;
+                    }
+
+                    userLocation = newPosition;
+                    updateDistancesFromCurrentLocation();
+                    saveTrackingData(); // Auto-save for sharing
+                },
+                (error) => {
+                    console.error('Geolocation error:', error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 5000
+                }
+            );
+        }
+
+        function stopLocationTracking() {
+            if (trackingWatchId !== null) {
+                navigator.geolocation.clearWatch(trackingWatchId);
+                trackingWatchId = null;
+            }
+        }
+
+        function hasMovedSignificantly(pos1, pos2) {
+            const latDiff = Math.abs(pos1.lat - pos2.lat);
+            const lngDiff = Math.abs(pos1.lng - pos2.lng);
+            return latDiff > MOVEMENT_THRESHOLD || lngDiff > MOVEMENT_THRESHOLD;
+        }
+
+        function updateTrailDisplay() {
+            // Remove existing trail
+            if (trailPolyline) {
+                trailPolyline.setMap(null);
+            }
+
+            // Create new trail polyline
+            if (movementTrail.length > 1) {
+                trailPolyline = new google.maps.Polyline({
+                    path: movementTrail,
+                    geodesic: true,
+                    strokeColor: '#9b59b6',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 3,
+                    map: map
+                });
+            }
+        }
+
+        function clearTrail() {
+            movementTrail = [];
+            if (trailPolyline) {
+                trailPolyline.setMap(null);
+                trailPolyline = null;
+            }
+        }
+
+        // Shared viewing functions
+        function saveTrackingData() {
+            if (!isOwner) return;
+
+            const trackingData = {
+                currentLocation: userLocation,
+                trail: movementTrail,
+                timestamp: new Date().toISOString(),
+                isTracking: trackingActive,
+                coordinates: document.querySelector('.coordinates').textContent
+            };
+
+            // In real implementation, this would save to a database/API
+            localStorage.setItem('shared_tracking_data', JSON.stringify(trackingData));
+            console.log('Tracking data saved for sharing:', trackingData);
+        }
+
+        function loadSharedTrackingData() {
+            if (isOwner) return;
+
+            // In real implementation, this would load from API
+            const savedData = localStorage.getItem('shared_tracking_data');
+            if (savedData) {
+                sharedData = JSON.parse(savedData);
+                displaySharedLocation();
+                displaySharedTrail();
+                updateSharedCoordinates();
+            }
+
+            // Auto-refresh shared data every 10 seconds
+            setInterval(loadSharedTrackingData, 10000);
+        }
+
+        function displaySharedLocation() {
+            if (!sharedData || !sharedData.currentLocation) return;
+
+            // Add/update shared location marker
+            if (currentLocationMarker) {
+                currentLocationMarker.setPosition(sharedData.currentLocation);
+            } else {
+                currentLocationMarker = new google.maps.Marker({
+                    position: sharedData.currentLocation,
+                    map: map,
+                    title: 'Scott\'s Current Location',
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: '#ffffff',
+                        fillOpacity: 1,
+                        strokeColor: '#e74c3c',
+                        strokeWeight: 3,
+                        scale: 8
+                    },
+                    zIndex: 1000
+                });
+            }
+
+            // Center map on shared location
+            map.setCenter(sharedData.currentLocation);
+        }
+
+        function displaySharedTrail() {
+            if (!sharedData || !sharedData.trail) return;
+
+            // Remove existing trail
+            if (trailPolyline) {
+                trailPolyline.setMap(null);
+            }
+
+            // Create shared trail polyline
+            if (sharedData.trail.length > 1) {
+                trailPolyline = new google.maps.Polyline({
+                    path: sharedData.trail,
+                    geodesic: true,
+                    strokeColor: '#9b59b6',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 3,
+                    map: map
+                });
+            }
+        }
+
+        function updateSharedCoordinates() {
+            if (!sharedData) return;
+
+            if (sharedData.coordinates) {
+                document.querySelector('.coordinates').textContent = sharedData.coordinates;
+            }
+
+            // Update tracking status
+            if (sharedData.isTracking) {
+                document.getElementById('modeIndicator').textContent = 'VIEWING LIVE TRACKING';
+                document.getElementById('sharedLight').style.display = 'block';
+                document.getElementById('sharedStatus').style.display = 'block';
+            }
+        }
+
+        function showLocationDetail(location) {
+            const overlay = document.getElementById('locationDetailOverlay');
+            const title = document.getElementById('detailTitle');
+            const content = document.getElementById('detailContent');
+            
+            title.textContent = location.name.toUpperCase();
+            
+            const actionButtons = isOwner ? `
+                <div class="detail-actions">
+                    <button class="detail-button" onclick="callLocation('${location.phone}')">Call</button>
+                    <button class="detail-button navigate" onclick="navigateToLocation(${location.coords.lat}, ${location.coords.lng})">Navigate</button>
+                </div>
+            ` : '<div style="text-align: center; color: #7f8c8d; font-size: 12px; margin-top: 20px;">Viewer Mode - Actions disabled</div>';
+            
+            content.innerHTML = `
+                <div class="detail-section">
+                    <div class="detail-section-title">Mission Intel</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">${location.status}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Distance</div>
+                            <div class="detail-value">${location.distance}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">ETA</div>
+                            <div class="detail-value">${location.eta}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Category</div>
+                            <div class="detail-value">${location.category}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-section-title">Contact Info</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Address</div>
+                            <div class="detail-value">${location.address}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Phone</div>
+                            <div class="detail-value">${location.phone}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Hours</div>
+                            <div class="detail-value">${location.hours}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Services</div>
+                            <div class="detail-value">${location.services.join(', ')}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                ${actionButtons}
+            `;
+            
+            overlay.style.display = 'flex';
+        }
+
+        function hideLocationDetail() {
+            document.getElementById('locationDetailOverlay').style.display = 'none';
+        }
+
+        function callLocation(phone) {
+            if (!isOwner || phone === 'N/A') return;
+            window.open(`tel:${phone}`);
+        }
+
+        // New enhanced functions
+        function centerMap() {
+            if (userLocation) {
+                map.setCenter(userLocation);
+                map.setZoom(16);
+            } else if (sharedData && sharedData.currentLocation) {
+                map.setCenter(sharedData.currentLocation);
+                map.setZoom(16);
+            } else {
+                // Default to Best Buy if no location available
+                map.setCenter(locations.bestBuy.coords);
+                map.setZoom(14);
+            }
+        }
+
+        function toggleTraffic() {
+            const button = document.getElementById('trafficButton');
+            
+            if (!trafficEnabled) {
+                trafficLayer.setMap(map);
+                button.classList.add('active');
+                button.textContent = 'HIDE TRAFFIC';
+                trafficEnabled = true;
+            } else {
+                trafficLayer.setMap(null);
+                button.classList.remove('active');
+                button.textContent = 'TRAFFIC';
+                trafficEnabled = false;
+            }
+        }
+
+        function updateRouteButton() {
+            const button = document.getElementById('routeButton');
+            if (targetLocation) {
+                button.textContent = `ROUTE TO ${targetLocation.name.split(' ')[0].toUpperCase()}`;
+                button.style.background = '#27ae60';
+            } else {
+                button.textContent = 'ROUTE';
+                button.style.background = '#e74c3c';
+            }
+        }
+
+        function plotRoute() {
+            if (!isOwner) return;
+            
+            // Clear existing route
+            if (currentDirectionsRenderer) {
+                currentDirectionsRenderer.setMap(null);
+            }
+
+            if (!targetLocation) {
+                alert('Click on a location marker first to set your destination!');
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const current = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    const directionsService = new google.maps.DirectionsService();
+                    currentDirectionsRenderer = new google.maps.DirectionsRenderer({
+                        polylineOptions: {
+                            strokeColor: '#e74c3c',
+                            strokeWeight: 4,
+                            strokeOpacity: 0.8
+                        },
+                        suppressMarkers: true,
+                        preserveViewport: false
+                    });
+                    
+                    currentDirectionsRenderer.setMap(map);
+                    
+                    directionsService.route({
+                        origin: current,
+                        destination: targetLocation.coords,
+                        travelMode: google.maps.TravelMode.DRIVING
+                    }, (result, status) => {
+                        if (status === 'OK') {
+                            currentDirectionsRenderer.setDirections(result);
+                            routeDisplayed = true;
+                            
+                            // Update button to show clear option
+                            const button = document.getElementById('routeButton');
+                            button.textContent = 'CLEAR ROUTE';
+                            button.style.background = '#e67e22';
+                            button.onclick = clearRoute;
+                        }
+                    });
+                }, (error) => {
+                    alert('Unable to get your current location for routing.');
+                });
+            }
+        }
+
+        function clearRoute() {
+            if (currentDirectionsRenderer) {
+                currentDirectionsRenderer.setMap(null);
+                currentDirectionsRenderer = null;
+                routeDisplayed = false;
+                
+                // Reset button
+                const button = document.getElementById('routeButton');
+                button.onclick = plotRoute;
+                updateRouteButton();
+            }
+        }
+
+        function navigateToLocation(lat, lng) {
+            if (!isOwner) return;
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+            window.open(url, '_blank');
+        }
+
+        // Legend functions
+        function showLegend() {
+            document.getElementById('legendOverlay').style.display = 'flex';
+        }
+
+        function hideLegend() {
+            document.getElementById('legendOverlay').style.display = 'none';
+        }
+            if (isOwner && navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude.toFixed(4);
+                    const lng = position.coords.longitude.toFixed(4);
+                    document.querySelector('.coordinates').textContent = `${lat}° N, ${lng}° W`;
+                });
+            }
+        }
+
+        // Initialize when page loads
+        window.onload = function() {
+            updateCoordinates();
+            if (typeof google !== 'undefined') {
+                initMap();
+            }
+        };
+
+        // Close popups with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                hideLegend();
+                hideLocationDetail();
+            }
+        });
+
+        // Auto-save tracking data every 30 seconds when tracking
+        setInterval(() => {
+            if (trackingActive && isOwner) {
+                saveTrackingData();
+            }
+        }, 30000);
+
+        // Create shareable link for others
+        function getShareableLink() {
+            const baseUrl = window.location.origin + window.location.pathname;
+            return `${baseUrl}?view=shared`;
+        }
+
+        // Log shareable link for easy access
+        console.log('Shareable link for others to view your location:', getShareableLink());
+    </script>
+    
+    <!-- Add Google Maps API with your key -->
+    <script async defer 
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTdJQ1Pk-PdixNjh82D3k7_Xqmfhhj1I0&callback=initMap">
+    </script>
+</body>
+</html>
