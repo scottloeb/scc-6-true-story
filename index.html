@@ -164,18 +164,30 @@
         }
         
         .event-image {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             border-radius: 6px;
             border: 2px solid;
             background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            display: block;
+        }
+        
+        .event-image img, .event-image video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        .event-image.placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.6em;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
         }
         
         .event-image.real {
@@ -189,6 +201,14 @@
         .event-image:hover {
             transform: scale(1.1);
             box-shadow: 0 0 15px currentColor;
+        }
+        
+        .event-image video:hover {
+            cursor: pointer;
+        }
+        
+        .event-image img:hover {
+            cursor: pointer;
         }
         
         .timeline-dot {
@@ -360,7 +380,9 @@
                 <div class="event-title">Arrival at Best Buy</div>
                 <div class="event-description">Successfully reached Best Buy Annapolis. Initial tactical assessment complete.</div>
                 <div class="event-images">
-                    <div class="event-image real">IMG_1849</div>
+                    <div class="event-image real">
+                        <img src="assets/IMG_1849.jpeg" alt="Arrival at Best Buy" title="Initial tactical assessment">
+                    </div>
                 </div>
             </div>
         </div>
@@ -383,7 +405,9 @@
                 <div class="event-title">TICKET #23 SECURED</div>
                 <div class="event-description">Nintendo Switch 2 + Mario Kart World Bundle guaranteed allocation obtained. MISSION SUCCESS PROBABILITY: 100%</div>
                 <div class="event-images">
-                    <div class="event-image real">IMG_1850</div>
+                    <div class="event-image real">
+                        <img src="assets/IMG_1850.jpeg" alt="Ticket #23 Secured" title="Mission success guaranteed">
+                    </div>
                 </div>
             </div>
         </div>
@@ -426,7 +450,11 @@
                 <div class="event-title">Prepare for Launch</div>
                 <div class="event-description">Final preparations for line movement. T-minus 2 minutes to midnight launch.</div>
                 <div class="event-images">
-                    <div class="event-image real">IMG_1853</div>
+                    <div class="event-image real">
+                        <video src="assets/IMG_1853.mov" muted loop autoplay title="Final preparations for launch">
+                            Your browser does not support video.
+                        </video>
+                    </div>
                 </div>
             </div>
         </div>
@@ -469,7 +497,11 @@
                 <div class="event-title">1 Person Away!</div>
                 <div class="event-description">Critical moment reached. Maximum tension point. One person ahead in line before objective acquisition.</div>
                 <div class="event-images">
-                    <div class="event-image real">IMG_1860</div>
+                    <div class="event-image real">
+                        <video src="assets/IMG_1860.mov" muted loop autoplay title="Critical moment - 1 person away">
+                            Your browser does not support video.
+                        </video>
+                    </div>
                 </div>
             </div>
         </div>
@@ -482,8 +514,14 @@
                 <div class="event-title">MISSION ACCOMPLISHED</div>
                 <div class="event-description">Nintendo Switch 2 + Mario Kart World Bundle SECURED! Official red packaging. Mission success video recorded. Total time: 3h 13m.</div>
                 <div class="event-images">
-                    <div class="event-image real">IMG_1863</div>
-                    <div class="event-image real">IMG_1864</div>
+                    <div class="event-image real">
+                        <img src="assets/IMG_1863.jpeg" alt="Nintendo Switch 2 Package" title="Mission accomplished!">
+                    </div>
+                    <div class="event-image real">
+                        <video src="assets/IMG_1864.mov" muted loop autoplay title="Victory celebration video">
+                            Your browser does not support video.
+                        </video>
+                    </div>
                 </div>
             </div>
         </div>
@@ -566,8 +604,12 @@
                 <div class="event-title">Target Reconnaissance</div>
                 <div class="event-description">Brief Target visit revealed completely empty Nintendo section. "No More Mario Kart Bundle" sign confirmed Best Buy was correct choice.</div>
                 <div class="event-images">
-                    <div class="event-image fake">IMG_1865</div>
-                    <div class="event-image fake">IMG_1866</div>
+                    <div class="event-image fake">
+                        <img src="assets/IMG_1866.jpeg" alt="Target reconnaissance" title="Empty Nintendo section">
+                    </div>
+                    <div class="event-image fake placeholder">
+                        Empty<br>Section
+                    </div>
                 </div>
             </div>
         </div>
@@ -580,9 +622,15 @@
                 <div class="event-title">The Darkest Hour</div>
                 <div class="event-description">Success probability: 15%. Target shelves barren. Single Nintendo logo remained. "Even though failure seems imminent, going back to do what's right"</div>
                 <div class="event-images">
-                    <div class="event-image fake">IMG_1867</div>
-                    <div class="event-image fake">IMG_1868</div>
-                    <div class="event-image fake">IMG_1869</div>
+                    <div class="event-image fake">
+                        <img src="assets/IMG_1867.jpeg" alt="Target shelves barren" title="The darkest hour">
+                    </div>
+                    <div class="event-image fake">
+                        <img src="assets/IMG_1868.jpeg" alt="Single Nintendo logo" title="Last hope">
+                    </div>
+                    <div class="event-image fake">
+                        <img src="assets/IMG_1869.jpeg" alt="Despair moment" title="15% success probability">
+                    </div>
                 </div>
             </div>
         </div>
@@ -605,7 +653,9 @@
                 <div class="event-title">Against All Odds</div>
                 <div class="event-description">Nintendo Switch 2 + Mario Kart World Bundle ACQUIRED. Total mission time: 15 hours 54 minutes. Hero's journey complete!</div>
                 <div class="event-images">
-                    <div class="event-image fake">Victory</div>
+                    <div class="event-image fake placeholder">
+                        Victory!<br>🎮
+                    </div>
                 </div>
             </div>
         </div>
@@ -643,6 +693,32 @@
                     entry.target.style.transform = 'translateY(0)';
                 }
             });
+        
+        // Ensure videos are properly loaded
+        document.querySelectorAll('video').forEach(video => {
+            video.addEventListener('loadstart', function() {
+                console.log('📹 Loading video:', this.src);
+            });
+            video.addEventListener('error', function() {
+                console.error('❌ Error loading video:', this.src);
+                // Show a placeholder if video fails to load
+                const placeholder = document.createElement('div');
+                placeholder.style.cssText = `
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255, 0, 0, 0.2);
+                    color: #ff6b6b;
+                    font-size: 10px;
+                    text-align: center;
+                    border-radius: 4px;
+                `;
+                placeholder.textContent = 'Video\nUnavailable';
+                this.parentNode.replaceChild(placeholder, this);
+            });
+        });
         }, observerOptions);
         
         // Apply animation to all timeline events
@@ -653,9 +729,52 @@
             observer.observe(event);
         });
         
+        // Add click handlers for images and videos
+        document.querySelectorAll('.event-image img, .event-image video').forEach(media => {
+            media.addEventListener('click', function() {
+                // Create fullscreen overlay
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(0, 0, 0, 0.9);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                    cursor: pointer;
+                `;
+                
+                const mediaClone = this.cloneNode(true);
+                mediaClone.style.cssText = `
+                    max-width: 90vw;
+                    max-height: 90vh;
+                    border-radius: 8px;
+                    box-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
+                `;
+                
+                if (mediaClone.tagName === 'VIDEO') {
+                    mediaClone.controls = true;
+                    mediaClone.autoplay = true;
+                }
+                
+                overlay.appendChild(mediaClone);
+                document.body.appendChild(overlay);
+                
+                // Close on click
+                overlay.addEventListener('click', () => {
+                    document.body.removeChild(overlay);
+                });
+            });
+        });
+        
         console.log('🚀 True Story Single Timeline Loaded');
         console.log('Real events on left (green), fake events on right (yellow)');
         console.log('All events chronologically ordered by timestamp');
+        console.log('📸 Click any image or video to view full size!');
     </script>
 </body>
 </html>
